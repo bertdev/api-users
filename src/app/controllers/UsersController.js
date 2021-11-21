@@ -16,6 +16,11 @@ class UserController {
       return res.status(400).json({ error: 'email inválido!' });
     }
 
+    const emailIsAlreadyUsed = await UserRepository.findByEmail(email);
+    if (emailIsAlreadyUsed) {
+      return res.status(400).json({ error: 'esse email já está em uso' });
+    }
+
     if (!password || !isPasswordValid(password)) {
       return res.status(400).json({ error: 'senha inválida!' });
     }
@@ -24,13 +29,17 @@ class UserController {
       return res.status(400).json({ error: 'primerio nome é obrigatório!' });
     }
 
-    await UserRepository.create({
+    const userCreated = await UserRepository.create({
       firstName,
       lastName,
       email,
       password,
-      age,
+      age: Number(age),
     });
+
+    if (!userCreated) {
+      return res.status(500).json({ error: 'problemas na criação do usuario' });
+    }
 
     res.sendStatus(204);
   }
