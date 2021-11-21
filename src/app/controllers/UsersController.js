@@ -1,3 +1,5 @@
+const bycript = require('bcrypt');
+const { generateToken } = require('../config/passport');
 const isEmailValid = require('../helpers/isEmailValid');
 const isPasswordValid = require('../helpers/isPasswordValid');
 
@@ -41,7 +43,24 @@ class UserController {
       return res.status(500).json({ error: 'problemas na criação do usuario' });
     }
 
-    res.sendStatus(204);
+    res.sendStatus(201);
+  }
+
+  async login(req, res) {
+    const { email, password } = req.body;
+
+    const user = await UserRepository.findByEmail(email);
+    if (!user) {
+      return res.status(401).json({ error: 'Email não registrado!' });
+    }
+
+    const isSamePassword = await bycript.compare(password, user.password);
+    if (!isSamePassword) {
+      res.status(401).json({ error: 'Senha inválida!' });
+    }
+
+    const token = generateToken({ email: user.email, name: user.name });
+    return res.status(200).json({ token });
   }
 }
 

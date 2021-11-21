@@ -2,6 +2,15 @@ const bycript = require('bcrypt');
 const User = require('../models/User');
 
 class UserRepository {
+  async findByEmail(emailUser) {
+    try {
+      const user = await User.findOne({ email: emailUser });
+      return user;
+    } catch {
+      return false;
+    }
+  }
+
   async create({
     firstName, lastName, email, password, age,
   }) {
@@ -19,15 +28,6 @@ class UserRepository {
       await newUser.save();
       return true;
     } catch (error) {
-      return false;
-    }
-  }
-
-  async findByEmail(emailUser) {
-    try {
-      const user = await User.findOne({ email: emailUser });
-      return user;
-    } catch {
       return false;
     }
   }
