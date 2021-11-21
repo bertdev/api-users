@@ -45,6 +45,16 @@ class UserRepository {
       return false;
     }
   }
+
+  async delete(emailUser) {
+    try {
+      const user = await User.findOne({ email: emailUser });
+      user.remove();
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
 }
 
 module.exports = new UserRepository();

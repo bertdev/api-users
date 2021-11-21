@@ -95,6 +95,17 @@ class UserController {
       newToken: token,
     });
   }
+
+  async delete(req, res) {
+    const { email } = req.user;
+
+    const userWasDeleted = await UserRepository.delete(email);
+    if (!userWasDeleted) {
+      return res.status(500).json({ error: 'houve um problema excluindo seu user, tente mais tarde!' });
+    }
+
+    res.sendStatus(204);
+  }
 }
 
 module.exports = new UserController();
