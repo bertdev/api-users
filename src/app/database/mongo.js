@@ -9,7 +9,7 @@ const mongoConnect = async () => {
     });
     console.log('mongo deu bom');
   } catch (error) {
-    console.log(error);
+    console.log('erro de conexão com o mongo:', error);
   }
 };
 
