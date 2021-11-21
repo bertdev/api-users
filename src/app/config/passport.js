@@ -1,8 +1,8 @@
 require('dotenv').config();
 const passport = require('passport');
-const { Strategy: JWTStrategy, ExtractJwt } = require('passport-jwt');
+const { Strategy, ExtractJwt } = require('passport-jwt');
 const jwt = require('jsonwebtoken');
-const UsersRepository = require('../repositories/UsersRepository');
+const User = require('../models/User');
 
 const notAturhorizedJson = {
   status: 401,
@@ -13,8 +13,8 @@ const options = {
   secretOrKey: process.env.JWT_SECRET,
 };
 
-passport.use(new JWTStrategy(options, (payload, done) => {
-  const user = UsersRepository.findByEmail(payload.email);
+passport.use(new Strategy(options, async (payload, done) => {
+  const user = await User.findOne({ email: payload.email });
   if (user) {
     return done(null, user);
   }
@@ -22,13 +22,12 @@ passport.use(new JWTStrategy(options, (payload, done) => {
 }));
 
 const privateRoute = (req, res, next) => {
-  const authFunction = passport.authenticate('jwt', (err, user) => {
+  passport.authenticate('jwt', (err, user) => {
     req.user = user;
     return user ? next() : next(notAturhorizedJson);
-  });
-  authFunction(req, res, next);
+  })(req, res, next);
 };
 
-const generateToken = (data) => jwt.sign(data, process.env.JWT_SECRET);
+const generateToken = (data) => jwt.sign(data, process.env.JWT_SECRET, { expiresIn: '2h' });
 
 module.exports = { passport, privateRoute, generateToken };

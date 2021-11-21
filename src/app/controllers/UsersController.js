@@ -59,8 +59,41 @@ class UserController {
       res.status(401).json({ error: 'Senha inválida!' });
     }
 
-    const token = generateToken({ email: user.email, name: user.name });
+    const token = generateToken({ email: user.email, name: user.name.firstName });
     return res.status(200).json({ token });
+  }
+
+  async update(req, res) {
+    const newUserData = {
+      firstName: req.body.name?.firstName || '',
+      lastName: req.body.name?.lastName,
+      email: req.body.email || '',
+      age: req.body.age,
+    };
+
+    if (newUserData.email && !isEmailValid(newUserData.email)) {
+      return res.status(400).json({ error: 'email inválido!' });
+    }
+
+    if (!newUserData.firstName && newUserData.firstName === '') {
+      return res.status(400).json({ error: 'primerio nome é obrigatório!' });
+    }
+
+    const user = await UserRepository.update(req.user.email, {
+      ...newUserData,
+    });
+
+    if (!user) {
+      return res.status(500).json({ error: 'falha ao atualizar' });
+    }
+
+    const token = generateToken({ email: user.email, name: user.name.firstName });
+    res.status(200).json({
+      name: user.name,
+      email: user.email,
+      age: user.age || null,
+      newToken: token,
+    });
   }
 }
 

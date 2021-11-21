@@ -31,6 +31,20 @@ class UserRepository {
       return false;
     }
   }
+
+  async update(query, newUserData) {
+    const user = await User.findOne({ email: query });
+    user.name.firstName = newUserData.firstName || user.name.firstName;
+    user.name.lastName = newUserData.lastName || user.name.lastName;
+    user.email = newUserData.email || user.email;
+    user.age = newUserData.age || user.age;
+    try {
+      await user.save();
+      return await User.findOne({ email: newUserData.email || query });
+    } catch (error) {
+      return false;
+    }
+  }
 }
 
 module.exports = new UserRepository();
